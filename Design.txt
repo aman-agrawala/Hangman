@@ -1,0 +1,8 @@
+For my game model, I edited the end_game function so that it would calculate a score value and update the Score "board" to reflect that. It would also update a players total score by adding the current games score to their total score variable. This would automatically update ranks realtime. I added a update_game_state function to track the specific guesses and the word's state at that time.
+
+I added a Rank model in order to keep track of all players, their total game scores and how they ranked relative to other players. 
+
+I also added a Game_History model to keep track of all the guesses and their corresponding word_states. This would be updated after every move was made. 
+
+Reflection on project:
+I struggled alot with finding a way to keep track of the ranks and game_history of the games. At first I tried to do this all within the Game model but after a while I realized that it is getting just cluttered with alot of unnecessary variables and functions. I decided that by separating these out into Rank and Game_History models would make my code much easier to read, comprehend and apply in the real world. 

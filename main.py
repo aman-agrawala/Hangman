@@ -25,7 +25,7 @@ class SendReminderEmail(webapp2.RequestHandler):
             logging.info(game)
             use = game.user.get()
             subject = 'This is a reminder!'
-            body = 'Hello {}, try out Hangman!'.format(use.name)
+            body = 'Hello {}, you still have incomplete Hangman games!'.format(use.name)
             # This will send test emails, the arguments to send_mail are:
             # from, to, subject, body
             mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),

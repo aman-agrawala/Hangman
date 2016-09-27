@@ -7,7 +7,14 @@
  running by visiting the API Explorer - by default localhost:8080/_ah/api/explorer.
 1.  (Optional) Generate your client library(ies) with the endpoints tool.
  Deploy your application.
- 
+
+## How to play:
+1. Create a user by using the create_user endpoint. You must provide an email and user name.
+2. Create a new game by using the new_game endpoint. You can specify the amount of attempts you want (or leave it blank for a default amount) but must specify the user_name. The final score you get at the end of your game is affected by the total number of attempts you select as is explained below in the scoring guidelines. 
+3. You can make a move in your hangman game by using the make_move endpoint. You must provide the urlsafe_game_key and select a guess. The guess must be a single letter. If you guess correctly, the game will inform you that the letter was found in the word and will display the new word state with that letter filled in the correct places. If the letter was not found, the game will inform you that the letter was not found and will not change the word state but will decrease your attempts_remaining value by 1. You can continue to play until you either find all the letters or if attempts_remaining equals 0. 
+
+## Scoring Guidelines:
+The score equation is: (attempts_allowed-(attempts_allowed-attempts_remaining))/(attempts_allowed). The value is stored as a float. The idea behind this was to try and normalize games based on the amount of total attempts the player was allowed to make. This makes it so that a game with 5 total attempts where the player perfectly guessed the word with no mistakes and a game with 10 total attempts where the player also perfectly guessed the word are considered equal and will both provide a score boost of 1 point. 
  
  
 ##Game Description:
@@ -138,25 +145,51 @@ given time. Each game can be retrieved or played by using the path parameter
 ##Models Included:
  - **User**
     - Stores unique user_name and (optional) email address.
+
+ - **Game_History**
+    - Stores the guesses and corresponding word_states for each individual guess.
     
  - **Game**
     - Stores unique game states. Associated with User model via KeyProperty.
-    
+
  - **Score**
-    - Records completed games. Associated with Users model via KeyProperty.
+    - Stores username, date of score, whether the user won or lost, the number of guesses the user made, and the current score of the game.
+    
+ - **Rank**
+    - Records the username, the total_score (sum of all individual game scores) and rank (ordered by highest total score.
     
 ##Forms Included:
+ - **Game_HistoryForm**
+    - Represents the state of the game during the various moves made. Displays the guesses made, the word's current state and the output is a easy to read string that displays the various guesses and game states. 
+
  - **GameForm**
     - Representation of a Game's state (urlsafe_key, attempts_remaining,
     game_over flag, message, user_name).
+
+ - **GameForms**
+    - Used to represent multiple GameForm forms.
+
  - **NewGameForm**
     - Used to create a new game (user_name, min, max, attempts)
+
+ - **RankingForm**
+    - Used to select the amount of high scores the user wants displayed.
+
+ - **RankForm**
+    - Represents various user's rank. It displays the user name, the total score of the user and the rank relative to other players. 
+
+- **RankForms**
+    - Used to represent multiple RankForm forms.
+
  - **MakeMoveForm**
     - Inbound make move form (guess).
+
  - **ScoreForm**
     - Representation of a completed game's Score (user_name, date, won flag,
     guesses).
+
  - **ScoreForms**
     - Multiple ScoreForm container.
+    
  - **StringMessage**
     - General purpose String container.
