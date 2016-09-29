@@ -123,6 +123,13 @@ class Game(ndb.Model):
         self.put()
         return self.word_state
 
+    def complete_game_state(self,guess):
+        state = guess
+        self.word_state = "".join(state)
+        self.current_guess = guess
+        self.put()
+        return self.word_state
+
     def convert_game_to_form(self):
         return GameForm(urlsafe_key=self.key.urlsafe(), 
                         attempts_remaining=self.attempts_remaining,
@@ -130,7 +137,8 @@ class Game(ndb.Model):
                         message='A game',
                         user_name=self.user.get().name,
                         word_state=self.word_state,
-                        cancel = self.cancel)
+                        cancel = self.cancel,
+                        current_guess=self.current_guess)
 
     def cancel_game(self):
         self.cancel=True

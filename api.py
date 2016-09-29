@@ -94,26 +94,53 @@ class GuessANumberApi(remote.Service):
         elif game.cancel:
             return game.to_form('Cannot make a move in a cancelled game!')
 
-        if len(request.guess) > 1:
-            raise endpoints.BadRequestException('Please guess 1 letter at a time!')
+        # Begin the procedure for guess checking. First we see if the input is a letter.
+        # Then we test if the user is guessing the entire word in one shot.
+        # If they aren't, we only allow the user to guess a letter at a time.
+        if request.guess.isalpha():
+            guess = request.guess.lower()
+            if request.guess == game.target:
+                word_state = game.complete_game_state(guess)
+                msg = 'Word Guessed Correctly!'
+                game_history = Game_History.query(ancestor = game.key).get()
+                game_history.guesses.append(guess)
+                game_history.word_states.append(game.target)
+                game_history.put()
+            else:
+            #guess = request.guess.lower()
 
-        # game.attempts_remaining -= 1
-        guess = request.guess.lower()
-
-        occurs = []
-        for m in re.finditer(guess,game.target):
-          occurs.append(m.start()) #locations where the letter is found in target
-
-        if occurs:
-            word_state = game.update_game_state(occurs, guess)
-            msg = 'Letter Found!'
-            game_history = Game_History.query(ancestor = game.key).get()
-            game_history.guesses.append(guess)
-            game_history.word_states.append(word_state)
-            game_history.put()
+                occurs = []
+                for m in re.finditer(guess,game.target):
+                    occurs.append(m.start()) #locations where the letter is found in target
+            
+                if len(request.guess) > 1:
+                    raise endpoints.BadRequestException('Please guess 1 letter at a time or guess the entire word!')
+                elif occurs:
+                    word_state = game.update_game_state(occurs, guess)
+                    msg = 'Letter Found!'
+                    game_history = Game_History.query(ancestor = game.key).get()
+                    game_history.guesses.append(guess)
+                    game_history.word_states.append(word_state)
+                    game_history.put()
         else:
-          msg = 'Letter not found!'
-          game.attempts_remaining -= 1
+            raise endpoints.BadRequestException('Please enter letters only! No symbols or numbers')
+        # game.attempts_remaining -= 1
+        #guess = request.guess.lower()
+
+        #occurs = []
+        #for m in re.finditer(guess,game.target):
+        #  occurs.append(m.start()) #locations where the letter is found in target
+
+        # if occurs:
+        #     word_state = game.update_game_state(occurs, guess)
+        #     msg = 'Letter Found!'
+        #     game_history = Game_History.query(ancestor = game.key).get()
+        #     game_history.guesses.append(guess)
+        #     game_history.word_states.append(word_state)
+        #     game_history.put()
+        # else:
+        #   msg = 'Letter not found!'
+        #   game.attempts_remaining -= 1
 
 
         # if request.guess < game.target:
@@ -183,7 +210,8 @@ class GuessANumberApi(remote.Service):
       if not user:
             raise endpoints.NotFoundException(
                     'A User with that name does not exist!')
-      games = Game.query(Game.user == user.key)
+      games = Game.query(Game.user == user.key and Game.cancel != True and Game.game_over != True)
+      #games.filter('')
       return GameForms(items=[game.convert_game_to_form() for game in games])
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
