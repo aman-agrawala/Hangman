@@ -97,6 +97,7 @@ class GuessANumberApi(remote.Service):
         # Begin the procedure for guess checking. First we see if the input is a letter.
         # Then we test if the user is guessing the entire word in one shot.
         # If they aren't, we only allow the user to guess a letter at a time.
+        msg = ''
         if request.guess.isalpha():
             guess = request.guess.lower()
             if request.guess == game.target:
@@ -122,6 +123,16 @@ class GuessANumberApi(remote.Service):
                     game_history.guesses.append(guess)
                     game_history.word_states.append(word_state)
                     game_history.put()
+                else:
+                    msg = 'Letter not found!'
+                    game.attempts_remaining -= 1
+
+
+                    game_history = Game_History.query(ancestor = game.key).get()
+                    game_history.guesses.append(guess)
+                    game_history.word_states.append(game.word_state)
+                    game_history.put()
+
         else:
             raise endpoints.BadRequestException('Please enter letters only! No symbols or numbers')
         # game.attempts_remaining -= 1
@@ -210,7 +221,7 @@ class GuessANumberApi(remote.Service):
       if not user:
             raise endpoints.NotFoundException(
                     'A User with that name does not exist!')
-      games = Game.query(Game.user == user.key and Game.cancel != True and Game.game_over != True)
+      games = Game.query(Game.user == user.key, Game.cancel == False, Game.game_over == False)
       #games.filter('')
       return GameForms(items=[game.convert_game_to_form() for game in games])
 

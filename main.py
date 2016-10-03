@@ -22,7 +22,7 @@ class SendReminderEmail(webapp2.RequestHandler):
         #logging.info('DEBUG DEBUG DEBUG')
         
         for user in users:
-            games = Game.query(Game.user == user.key and Game.game_over == False and Game.cancel == False).fetch()
+            games = Game.query(Game.user == user.key, Game.game_over == False, Game.cancel == False).fetch()
             if games:
                 subject = 'This is a reminder'
                 body = 'Hello {}, you still have {} incomplete Hangman games!'.format(user.name, len(games))
